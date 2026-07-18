@@ -19,3 +19,9 @@ Thumbs.db
 
 # Composer
 src/.composer/
+
+# Laravel runtime
+src/storage/*.key
+
+# Vite
+src/public/hot
