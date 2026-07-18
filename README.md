@@ -2,7 +2,11 @@
 
 Полноценное Docker-окружение для локальной разработки Laravel 13.
 
-## Технологии
+Проект подготовлен для запуска одной командой через Docker Compose.
+
+---
+
+# Технологии
 
 | Технология | Версия |
 |---|---|
@@ -15,7 +19,7 @@
 | Vite | Latest |
 | Docker Compose | Latest |
 
-Окружение подготовлено для:
+Поддерживается:
 
 - Windows + WSL2
 - Linux
@@ -25,7 +29,7 @@
 
 # Требования
 
-Перед началом должны быть установлены:
+Перед началом необходимо установить:
 
 - Docker
 - Docker Compose
@@ -46,19 +50,19 @@ git --version
 
 ## Клонирование
 
+HTTPS:
+
+```bash
+git clone https://github.com/DmitryBDA/laravel-project.git
+```
+
 SSH:
 
 ```bash
 git clone git@github.com:DmitryBDA/laravel-project.git
 ```
 
-или HTTPS:
-
-```bash
-git clone https://github.com/DmitryBDA/laravel-project.git
-```
-
-Переход в проект:
+Переход в папку:
 
 ```bash
 cd laravel-project
@@ -66,80 +70,47 @@ cd laravel-project
 
 ---
 
-# Настройка Laravel
+# Быстрый запуск
 
-Перейти в Laravel:
-
-```bash
-cd src
-```
-
-Создать файл окружения:
+Выполнить:
 
 ```bash
-cp .env.example .env
+./install.sh
 ```
 
-Вернуться назад:
+Скрипт автоматически:
 
-```bash
-cd ..
+1. Создаст Laravel `.env`
+2. Соберёт Docker контейнеры
+3. Запустит сервисы
+4. Дождётся PostgreSQL
+5. Установит Composer зависимости
+6. Создаст APP_KEY
+7. Настроит права Laravel
+8. Установит Node зависимости
+9. Запустит миграции
+
+После завершения:
+
 ```
+======================================
+ Installation completed successfully!
+======================================
 
-Laravel `.env` должен содержать:
+Laravel:
+http://localhost:8080
 
-```env
-APP_NAME=Laravel
-APP_ENV=local
-APP_DEBUG=true
-APP_URL=http://localhost:8080
-
-
-DB_CONNECTION=pgsql
-DB_HOST=postgres
-DB_PORT=5432
-DB_DATABASE=laravel
-DB_USERNAME=laravel
-DB_PASSWORD=secret
-
-
-CACHE_STORE=redis
-
-SESSION_DRIVER=redis
-
-QUEUE_CONNECTION=redis
-
-
-REDIS_CLIENT=phpredis
-REDIS_HOST=redis
-REDIS_PASSWORD=null
-REDIS_PORT=6379
-
-
-VITE_APP_URL=http://localhost:8080
+Vite:
+http://localhost:5173
 ```
 
 ---
 
-# Запуск Docker
+# Docker контейнеры
 
-## Сборка контейнеров
+После установки должны работать:
 
-```bash
-docker compose build
 ```
-
----
-
-## Запуск
-
-```bash
-docker compose up -d
-```
-
-После запуска должны работать:
-
-```text
 laravel_nginx
 laravel_php
 laravel_postgres
@@ -153,77 +124,16 @@ laravel_node
 docker compose ps
 ```
 
----
-
-# Установка зависимостей
-
-## PHP зависимости
-
-```bash
-docker compose exec php composer install
-```
-
----
-
-## Laravel ключ
-
-```bash
-docker compose exec php php artisan key:generate
-```
-
----
-
-## Права Laravel
-
-```bash
-docker compose exec php chmod -R 775 storage bootstrap/cache
-```
-
----
-
-## Миграции
-
-```bash
-docker compose exec php php artisan migrate
-```
-
-Проверка:
-
-```bash
-docker compose exec php php artisan migrate:status
-```
-
----
-
-# Node и Vite
-
-Node контейнер запускается автоматически.
-
-Установка зависимостей:
-
-```bash
-docker compose exec node npm install
-```
-
-После установки перезапустить:
-
-```bash
-docker compose restart node
-```
-
-Проверить:
-
-```bash
-docker compose logs node
-```
-
-Ожидаемый результат:
+Пример:
 
 ```
-VITE ready
+NAME                  STATUS
 
-Local:
-http://localhost:5173
+laravel_nginx         running
+laravel_php           running
+laravel_postgres      running
+laravel_redis         running
+laravel_node          running
 ```
 
 ---
@@ -256,6 +166,53 @@ localhost:6379
 
 ---
 
+# Переменные Laravel
+
+Файл:
+
+```
+src/.env
+```
+
+Создаётся автоматически из:
+
+```
+src/.env.example
+```
+
+Основные настройки:
+
+```env
+APP_NAME=Laravel
+APP_ENV=local
+APP_DEBUG=true
+APP_URL=http://localhost:8080
+
+
+DB_CONNECTION=pgsql
+DB_HOST=postgres
+DB_PORT=5432
+DB_DATABASE=laravel
+DB_USERNAME=laravel
+DB_PASSWORD=secret
+
+
+CACHE_STORE=redis
+QUEUE_CONNECTION=redis
+SESSION_DRIVER=redis
+
+
+REDIS_CLIENT=phpredis
+REDIS_HOST=redis
+REDIS_PORT=6379
+REDIS_PASSWORD=null
+
+
+VITE_APP_URL=http://localhost:8080
+```
+
+---
+
 # Docker команды
 
 ## Запуск
@@ -282,7 +239,15 @@ docker compose restart
 
 ---
 
-## Статус контейнеров
+## Пересборка
+
+```bash
+docker compose up -d --build
+```
+
+---
+
+## Статус
 
 ```bash
 docker compose ps
@@ -290,7 +255,7 @@ docker compose ps
 
 ---
 
-## Логи всех контейнеров
+## Все логи
 
 ```bash
 docker compose logs -f
@@ -298,26 +263,36 @@ docker compose logs -f
 
 ---
 
-## Логи Nginx
+# Логи сервисов
+
+Nginx:
 
 ```bash
 docker compose logs -f nginx
 ```
 
----
-
-## Логи PHP
+PHP:
 
 ```bash
 docker compose logs -f php
 ```
 
----
-
-## Логи Node/Vite
+Node/Vite:
 
 ```bash
 docker compose logs -f node
+```
+
+PostgreSQL:
+
+```bash
+docker compose logs -f postgres
+```
+
+Redis:
+
+```bash
+docker compose logs -f redis
 ```
 
 ---
@@ -350,7 +325,7 @@ docker compose exec postgres bash
 
 # Laravel команды
 
-Очистка кеша:
+## Очистка кеша
 
 ```bash
 docker compose exec php php artisan optimize:clear
@@ -358,7 +333,7 @@ docker compose exec php php artisan optimize:clear
 
 ---
 
-Миграции:
+## Миграции
 
 ```bash
 docker compose exec php php artisan migrate
@@ -366,7 +341,15 @@ docker compose exec php php artisan migrate
 
 ---
 
-Откат:
+## Статус миграций
+
+```bash
+docker compose exec php php artisan migrate:status
+```
+
+---
+
+## Откат миграций
 
 ```bash
 docker compose exec php php artisan migrate:rollback
@@ -374,7 +357,7 @@ docker compose exec php php artisan migrate:rollback
 
 ---
 
-Создание контроллера:
+## Создать контроллер
 
 ```bash
 docker compose exec php php artisan make:controller ExampleController
@@ -382,7 +365,7 @@ docker compose exec php php artisan make:controller ExampleController
 
 ---
 
-Создание модели:
+## Создать модель
 
 ```bash
 docker compose exec php php artisan make:model Example
@@ -390,7 +373,7 @@ docker compose exec php php artisan make:model Example
 
 ---
 
-Tinker:
+## Tinker
 
 ```bash
 docker compose exec php php artisan tinker
@@ -398,9 +381,9 @@ docker compose exec php php artisan tinker
 
 ---
 
-# Проверка Redis
+# Redis проверка
 
-Войти:
+Запустить:
 
 ```bash
 docker compose exec php php artisan tinker
@@ -460,9 +443,28 @@ docker compose exec node npm -v
 
 ---
 
-# Production build
+# Vite
 
-Проверка сборки:
+Проверить:
+
+```bash
+docker compose logs node
+```
+
+Ожидаемый результат:
+
+```
+VITE ready
+
+Local:
+http://localhost:5173
+```
+
+---
+
+# Production сборка
+
+Проверка frontend сборки:
 
 ```bash
 docker compose exec node npm run build
@@ -475,8 +477,10 @@ docker compose exec node npm run build
 ```
 laravel-project
 │
-├── .gitignore
+├── install.sh
 ├── docker-compose.yml
+├── README.md
+├── .gitignore
 │
 ├── docker
 │   │
@@ -487,18 +491,17 @@ laravel-project
 │       ├── Dockerfile
 │       └── php.ini
 │
-├── src
-│   │
-│   ├── app
-│   ├── artisan
-│   ├── bootstrap
-│   ├── config
-│   ├── database
-│   ├── public
-│   ├── resources
-│   └── routes
-│
-└── README.md
+└── src
+    │
+    ├── app
+    ├── artisan
+    ├── bootstrap
+    ├── config
+    ├── database
+    ├── public
+    ├── resources
+    ├── routes
+    └── storage
 ```
 
 ---
@@ -529,7 +532,7 @@ Commit:
 git commit -m "Описание изменений"
 ```
 
-Отправить:
+Push:
 
 ```bash
 git push origin feature/example
@@ -539,7 +542,17 @@ git push origin feature/example
 
 # Troubleshooting
 
-## Node контейнер не запускается
+## Ошибка прав
+
+Выполнить:
+
+```bash
+docker compose exec php chmod -R ug+rwX storage bootstrap/cache
+```
+
+---
+
+## Node не запускается
 
 Проверить:
 
@@ -557,26 +570,16 @@ docker compose logs node
 
 ## Laravel не открывается
 
-Проверить:
+Проверить контейнеры:
 
 ```bash
 docker compose ps
 ```
 
-Логи:
+Проверить Nginx:
 
 ```bash
 docker compose logs nginx
-```
-
----
-
-## Ошибка прав Laravel
-
-Выполнить:
-
-```bash
-docker compose exec php chmod -R 775 storage bootstrap/cache
 ```
 
 ---
